@@ -17,6 +17,8 @@ from population import initialize_population, initialize_destination_matrix,\
 set_destination_bounds, save_data, save_population, Population_trackers
 from visualiser import build_fig, draw_tstep, set_style, plot_sir
 
+
+from government_action import GovernmentAction,Mandatory_measures
 #set seed for reproducibility
 #np.random.seed(100)
 
@@ -38,7 +40,8 @@ class Simulation():
         #initalise destinations vector
         self.destinations = initialize_destination_matrix(self.Config.pop_size, 1)
 
-
+        self.government_action = GovernmentAction(Mandatory_measures())
+    
     def reinitialise(self):
         '''reset the simulation'''
 
@@ -87,25 +90,26 @@ class Simulation():
             self.population[self.population[:,11] == 0] = out_of_bounds(self.population[self.population[:,11] == 0],
                                                                         _xbounds, _ybounds)
 
-        #set randoms
-        if self.Config.lockdown:
-            if len(self.pop_tracker.infectious) == 0:
-                mx = 0
-            else:
-                mx = np.max(self.pop_tracker.infectious)
+        # #set randoms
+        # if self.Config.lockdown:
+        #     if len(self.pop_tracker.infectious) == 0:
+        #         mx = 0
+        #     else:
+        #         mx = np.max(self.pop_tracker.infectious)
 
-            if len(self.population[self.population[:,6] == 1]) >= len(self.population) * self.Config.lockdown_percentage or\
-               mx >= (len(self.population) * self.Config.lockdown_percentage):
-                #reduce speed of all members of society
-                self.population[:,5] = np.clip(self.population[:,5], a_min = None, a_max = 0.001)
-                #set speeds of complying people to 0
-                self.population[:,5][self.Config.lockdown_vector == 0] = 0
-            else:
-                #update randoms
-                self.population = update_randoms(self.population, self.Config.pop_size, self.Config.speed)
-        else:
-            #update randoms
-            self.population = update_randoms(self.population, self.Config.pop_size, self.Config.speed)
+        #     if len(self.population[self.population[:,6] == 1]) >= len(self.population) * self.Config.lockdown_percentage or\
+        #        mx >= (len(self.population) * self.Config.lockdown_percentage):
+        #         #reduce speed of all members of society
+        #         self.population[:,5] = np.clip(self.population[:,5], a_min = None, a_max = 0.001)
+        #         #set speeds of complying people to 0
+        #         self.population[:,5][self.Config.lockdown_vector == 0] = 0
+        #     else:
+        #         #update randoms
+        #         self.population = update_randoms(self.population, self.Config.pop_size, self.Config.speed)
+        # else:
+        #     #update randoms
+        #     self.population = update_randoms(self.population, self.Config.pop_size, self.Config.speed)
+        self.government_action.government_action(self.population,self.destinations,self.Config,self.pop_tracker)
 
         #for dead ones: set speed and heading to 0
         self.population[:,3:5][self.population[:,6] == 3] = 0

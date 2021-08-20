@@ -63,7 +63,7 @@ class Configuration():
         #the proportion of the population that practices social distancing, simulated
         #by them standing still
         self.proportion_distancing = kwargs.get('proportion_distancing', 0)
-        self.speed = kwargs.get('speed', 0.01) #average speed of population
+        self.speed = kwargs.get('speed', 0.03) #average speed of population
         #when people have an active destination, the wander range defines the area
         #surrounding the destination they will wander upon arriving
         self.wander_range = kwargs.get('wander_range', 0.05)
